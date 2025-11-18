@@ -726,6 +726,7 @@ dist_beta <- Dist$new(
 # Zero-one-inflated beta ========================
 dist_zoibeta <- Dist$new(
   name = "zoibeta",
+  name_long = "zero-one-inflated beta",
   pdf = function(x, shape1, shape2, zeromass, onemass, log = FALSE) {
     l <- rep(NA, length(x))
     l[which(x == 0)] <- zeromass
