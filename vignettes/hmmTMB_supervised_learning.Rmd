@@ -1,0 +1,102 @@
+---
+title: "(Semi-)supervised learning in hmmTMB"
+author: "Théo Michelot"
+date: "`r Sys.Date()`"
+output: 
+  pdf_document:
+  number_sections: true
+header-includes:
+  \renewcommand{\baselinestretch}{1.2}
+fontsize: 12pt
+bibliography: refs.bib
+vignette: >
+  %\VignetteIndexEntry{Supervised learning in hmmTMB}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+  
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, error = FALSE, warning = FALSE,
+  comment = NA
+)
+```
+
+This vignette illustrates the use of supervised or semi-supervised learning in hmmTMB. This feature is helpful in cases where information is available about the value of the state process, at least over some subset of the data. There are two cases of interest:
+
+- The state at time $t$ is known with certainty. For example: I know that $S_t = 1$.
+
+- The state at time $t$ is not known with certainty, but we have narrowed down its value to a subset of all possible states. For example: I know that $S_t \in \{ 1, 3, 4\}$, or I know that $S_t \neq 1$.
+
+Both of these types of information can be passed to an hmmTMB model, to help identify the states of interest. In the absence of this information, the states are data-driven and their interpretation requires post-hoc inspection of the results.
+
+For illustration, we use a time series of annual numbers of lynx trappings in Canada between 1821 and 1934. This data set is automatically loaded with R, as a data frame names `lynx`.
+
+```{r load-stuff, fig.width = 6, fig.height = 3, out.width="90%", fig.align = "center"}
+# Load packages and color palette
+library(ggplot2)
+theme_set(theme_bw())
+library(hmmTMB)
+
+# Format lynx data
+data <- data.frame(year = 1821:1934,
+                   lynx = as.numeric(lynx))
+
+# Plot time series of lynx trappings
+ggplot(data, aes(year, lynx)) +
+  geom_point() +
+  geom_line()
+```
+
+We are interested to fit a 3-state model to this time series, and we further make the following assumptions: 
+
+- any year with fewer than 3000 trappings cannot be in state 3 (i.e., it can only be in state 1 or 2);
+
+- any year with more than 3500 trappings can only be in state 3.
+
+To pass this information to the model, we create a vector where each entry is either the known state (e.g., "1"), the list of possible states (e.g, "1, 2"), or NA if no information is available about the state. The elements of the vector of character strings. Finally, we add this vector as an additional column to the data frame, named `state`.
+
+```{r add-state}
+known_states <- ifelse(data$lynx < 3000, "1, 2", NA)
+known_states <- ifelse(data$lynx >= 3500, "3", known_states)
+data$state <- known_states
+head(data, 10)
+```
+
+We can now create the `MarkovChain`, `Observation`, and `HMM` models as usual. The model automatically detectes the column `state` and uses it to define constraints on the state process where needed.
+
+```{r def-model}
+# Define hidden state model
+hid <- MarkovChain$new(data = data, n_states = 3)
+
+# Define observation model
+dists <- list(lynx = "gamma2")
+par0 <- list(lynx = list(mean = c(100, 1000, 3000), 
+                         sd = c(100, 1000, 3000)))
+obs <- Observation$new(data = data, dists = dists, par = par0)
+
+# Check state constraints
+head(obs$known_states(), 10)
+```
+
+We see that the package created a matrix, accessible as `obs$known_states()`, which includes information about the known states. Specifically, that matrix has one row for each time point and one column for each state. Each entry is either 0, if that state is possible at that time, or 1, if that state isn't possible at that time. Here, we can check that the structure of the matrix is consistent with the information we passed through the `state` column.
+
+Finally, we fit the model.
+
+```{r fit-model}
+hmm <- HMM$new(obs = obs, hid = hid)
+hmm$fit(silent = TRUE)
+```
+
+We can get the most likely state sequence (using `viterbi()`) and check that the model-derived states are consistent with the constraints we used.
+
+```{r viterbi}
+data$vit <- hmm$viterbi()
+head(data, 10)
+```
+
+We can also plot the estimated state-dependent gamma distributions. The distribution for state 3 is virtually zero for counts below 3000, in line with the decision we made to preclude state 3 for years with < 3000 trappings.
+
+```{r plot-dist, fig.width = 5, fig.height = 3, out.width="80%", fig.align = "center"}
+hmm$plot_dist(var = "lynx")
+```

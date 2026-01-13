@@ -43,6 +43,8 @@ We describe functionalities of the package in several vignettes, which are liste
  
 - ['General dependence structures in hmmTMB'](https://github.com/TheoMichelot/hmmTMB/blob/master/vignettes/hmmTMB_general_structures.pdf): Implementation details for hidden Markov models (HMMs) with non-standard dependence structures, including hidden semi-Markov models, higher-order HMMs, autoregressive HMMs, and coupled HMMs.
  
+- ['(Semi-)supervised learning in hmmTMB'](https://github.com/TheoMichelot/hmmTMB/blob/master/vignettes/hmmTMB_supervised_learning.pdf): Illustration of semi-supervised learning to pass information about state process to model.
+ 
 ### Case studies
   
 - ['Flexible animal movement modelling using hmmTMB'](https://github.com/TheoMichelot/hmmTMB/blob/master/vignettes/hmmTMB_example_movement.pdf): Description of wild haggis movement analysis, illustrating how non-parametric covariate effects can be included. This includes two different types of movement models: (1) correlated random walks based on step lengths and turning angles, and (2) correlated random walks based on locations directly.
