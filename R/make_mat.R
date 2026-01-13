@@ -42,6 +42,9 @@ make_matrices = function(formulas, data, new_data = NULL, gam_args = NULL) {
   for(k in seq_along(forms)) {
     form <- forms[[k]]
     
+    # Check that tensor products aren't used (not supported)
+    check_smooths(form)
+    
     # Check that random effect variables are factors
     var_re <- find_re(form)
     for(var in var_re) {

@@ -411,6 +411,23 @@ find_re <- function(form) {
   return(var_re)
 }
 
+#' Check that only supported smooths are used
+#' 
+#' Currently, this raises an error message if tensor product
+#' smooths are used (te, ti, t2).
+#' 
+#' @param form Model formula
+check_smooths <- function(form) {
+  term_labs <- attr(terms(form), "term.labels")
+  pattern <- 's\\(.*,\\s*bs\\s*=\\s*["\']t[ei2]["\']\\)'
+  check <- grepl(pattern, term_labs)
+  
+  if(any(check)) {
+    stop(paste0("Tensor product smooths 'te', 'ti' and 't2' are currently ",
+                "not supported in hmmTMB."))
+  }
+}
+
 #' Transforms matrix to dgTMatrix
 #' 
 #' @param x Matrix or vector. If this is a vector, it is formatted into
