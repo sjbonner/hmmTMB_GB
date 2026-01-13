@@ -15,7 +15,9 @@ Observation <- R6Class(
     #' @description Create new Observation object
     #' 
     #' @param data Data frame containing response variables (named in dists
-    #' and par) and covariates (named in formulas)
+    #' and par) and covariates (named in formulas). Note that "state" is a
+    #' reserved column name, used to pass known states to the model (semi-
+    #' supervised learning).
     #' @param dists Named list of distribution names for each data stream,
     #' with the following options: beta, binom, cat, dir, exp, foldednorm, 
     #' gamma, gamma2, lnorm, mvnorm, nbinom, norm, pois, t, truncnorm, tweedie, 
@@ -119,6 +121,8 @@ Observation <- R6Class(
       
       # Check for observed states 
       if ("state" %in% colnames(data)) {
+        message("Column 'state' used to fix known states.")
+        
         kn <- lapply(strsplit(as.character(data$state), ","), FUN = as.numeric)
         private$known_states_data_ <- data$state
         known_states <- matrix(1, nr = nrow(data), nc = n_states)

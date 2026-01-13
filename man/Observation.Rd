@@ -153,7 +153,9 @@ Create new Observation object
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{data}}{Data frame containing response variables (named in dists
-and par) and covariates (named in formulas)}
+and par) and covariates (named in formulas). Note that "state" is a
+reserved column name, used to pass known states to the model (semi-
+supervised learning).}
 
 \item{\code{dists}}{Named list of distribution names for each data stream,
 with the following options: beta, binom, cat, dir, exp, foldednorm, 
