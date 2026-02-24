@@ -35,6 +35,7 @@
    DATA_IMATRIX(ncol_re_hid); // number of columns of S and X_re for each random effect
    DATA_INTEGER(include_smooths); // > 0 = include penalty in likelihood evaluation
    DATA_IVECTOR(ref_tpm); // indices of reference transition probabilities
+   DATA_IVECTOR(ref_delta0); // indices of reference initial probabilities
    // prior information 
    DATA_MATRIX(coeff_fe_obs_prior); // means, sds for prior on fixed effects for obs 
    DATA_MATRIX(coeff_fe_hid_prior); // means, sds for prior on fixed effects for hidden 
@@ -128,11 +129,16 @@
      }
      
    } else if (statdist == 0) {
-     // Case 2: the initial distribution is estimated
+     // Case 2: the initial distribution is not stationary
+     // (estimated or fixed)
      delta0.setOnes();
+     int cur = 0;
      for(int i = 0; i < n_ID; i++) {
-       for(int j = 0; j < n_states - 1; j++) {
-         delta0(i, j) = exp(log_delta0(j * n_ID + i));
+       for(int j = 0; j < n_states; j++) {
+         if(j != ref_delta0(i) - 1) {
+           delta0(i, j) = exp(log_delta0(cur));
+           cur++;
+         }
        }
        delta0.row(i) = delta0.row(i)/delta0.row(i).sum();
      }

@@ -683,6 +683,7 @@ HMM <- R6Class(
                       ncol_re_hid = ncol_re_hid,
                       include_smooths = 1, 
                       ref_tpm = self$hid()$ref(),
+                      ref_delta0 = self$hid()$ref_delta0(),
                       coeff_fe_obs_prior = priors$coeff_fe_obs, 
                       coeff_fe_hid_prior = priors$coeff_fe_hid, 
                       log_lambda_obs_prior = priors$log_lambda_obs, 
