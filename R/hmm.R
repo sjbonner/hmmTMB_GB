@@ -1904,14 +1904,10 @@ HMM <- R6Class(
     #' @return Marginal AIC
     AIC_marginal = function() {
       llk <- -self$out()$objective
-      npar <- nrow(self$obs()$coeff_fe()) + 
-        nrow(self$hid()$coeff_fe()) +
-        length(self$obs()$lambda()) +
-        length(self$hid()$lambda())
-      if(!self$hid()$stationary()) {
-        npar <- npar + length(self$coeff_list()$log_delta0)
-      }
       
+      
+      npar <- length(self$tmb_rep()$par.fixed)
+   
       if(nrow(self$obs()$coeff_re()) + nrow(self$hid()$coeff_re()) > 0) {
         warning("AIC functions are experimental for models with random effects",
                 " or splines. Use at your own risk.")
@@ -1919,7 +1915,8 @@ HMM <- R6Class(
       
       aic <- - 2 * llk + 2 * npar
       
-      return(aic)
+  
+      return(list(aic = aic, npar = npar))
     },
     
     #' @description Conditional Akaike Information Criterion
