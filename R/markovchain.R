@@ -600,11 +600,12 @@ MarkovChain <- R6Class(
     #' @return Vector of parameters on linear predictor scale
     tpm2par = function(tpm) {
       
+      n_states <- self$nstates()
+      
       # Initialize
-      n_states <- nrow(tpm)
       ltpm <- matrix(NA, n_states, n_states)
       
-      # Tag loss probabilities
+      # Tag loss probabilities1
       ltpm[-n_states,n_states] <- qlogis(tpm[-n_states,n_states])
       
       # Remaining transition probabilities
@@ -630,20 +631,22 @@ MarkovChain <- R6Class(
     #' 
     #' @return Transition probability matrix
     par2tpm = function(par) {
-      ltpm <- matrix(0, nrow = self$nstates(), ncol = self$nstates())
+      n_states <- self$nstates()
+      
+      ltpm <- matrix(0, nrow = n_states, ncol = n_states)
       ltpm[!t(self$ref_mat())] <- par
       ltpm <- t(ltpm) # transpose to fill by rows (like in C++)
       
-      tpm <- matrix(NA, nrow = self$nstates(), ncol = self$nstates())
-      tpm[-n_states,n_states] <- plogis(ltpm[-self$nstates(), self$nstates()])
+      tpm <- matrix(NA, nrow = n_states, ncol = n_states)
+      tpm[-n_states,n_states] <- plogis(ltpm[-n_states, n_states])
       
-      for(i in 1:(self$nstates() - 1)){
-        tpm[i,-self$nstates()] <- exp(ltpm[i,-self$nstates()]) 
-        tpm[i,-self$nstates()] <- tpm[i,-self$nstates()] / sum(tpm[i,-self$nstates()]) * 
-          (1 - tpm[i, self$nstates()])
+      for(i in 1:(n_states - 1)){
+        tpm[i,-n_states] <- exp(ltpm[i,-n_states]) 
+        tpm[i,-n_states] <- tpm[i,-n_states] / sum(tpm[i,-n_states]) * 
+          (1 - tpm[i, n_states])
       }
       
-      tpm[self$nstates(),] <- c(rep(0, self$nstates()-1), 1)
+      tpm[n_states,] <- c(rep(0, n_states-1), 1)
       
       return(tpm)
     },
