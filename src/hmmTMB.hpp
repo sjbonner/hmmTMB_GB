@@ -85,15 +85,36 @@
      matrix<Type> tpm(n_states, n_states);
      int cur = 0;
      for (int j = 0; j < n_states; j++) {
+        // Reference state
        tpm(j, ref_tpm(j) - 1) = 1;
+       Type tpm_denominator = 1;
+       
+       // Remaining states
        for (int k = 0; k < n_states; k++) {
+         
          if (k != ref_tpm(j) - 1) {
-           tpm(j, k) = exp(ltpm_mat(i, cur));
+           if (k == (n_states - 1)){
+             tpm(j, k) = 1/(1 + exp(-ltpm_mat(i,cur)));
+           }
+           else{
+             tpm(j, k) = exp(ltpm_mat(i, cur));
+             tpm_denominator = tpm_denominator + tpm(j,k);
+           }
            cur++;
          }
        }
-       tpm.row(j) = tpm.row(j)/tpm.row(j).sum();
+       for (int k = 0; k < (n_states - 1); k++){
+         tpm(j,k) = tpm(j,k)/tpm_denominator * (1 - tpm(j, n_states - 1));
+       }
      }
+     // if(i ==1){
+     //   for (int j = 0; j < n_states; j++) {
+     //     for (int k = 0; k < n_states; k++) {
+     //       std::cout << tpm(j,k) << " ";
+     //     }
+     //     std::cout << std::endl; // Move to the next line after each row
+     //   }
+     // }
      tpm_array(i) = tpm;
    }
    
