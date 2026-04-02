@@ -107,14 +107,7 @@
          tpm(j,k) = tpm(j,k)/tpm_denominator * (1 - tpm(j, n_states - 1));
        }
      }
-     // if(i ==1){
-     //   for (int j = 0; j < n_states; j++) {
-     //     for (int k = 0; k < n_states; k++) {
-     //       std::cout << tpm(j,k) << " ";
-     //     }
-     //     std::cout << std::endl; // Move to the next line after each row
-     //   }
-     // }
+
      tpm_array(i) = tpm;
    }
    
